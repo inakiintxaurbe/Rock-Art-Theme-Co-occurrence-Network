@@ -1,5 +1,4 @@
-# ------------------------------------------------------
-#   THEME CO-OCCURRENCE NETWORK (Gephi export)
+#   THEME CO-OCCURRENCE NETWORKS IN PALAEOLITHIC ROCK ART
 #
 # --> Download Table_DATA.xlsx from GitHub 
 #   (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art)
@@ -15,7 +14,6 @@
 #   (Université du Bordeaux)
 #   Date: 2026-01-04
 #   Copyright (C) 2026  Iñaki Intxaurbe
-# ------------------------------------------------------
 
 
 
@@ -264,5 +262,6 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
 
 
