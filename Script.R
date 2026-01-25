@@ -5,7 +5,7 @@
 #   // THIS CAN BE CHANGED IN ORDER TO PUT THE LINK TO ANOTHER DATA BASE WITH THE SAME STRUCTURE
 # --> Extract Panel from GU code (e.g. S.E.II.01 -> S.E.II)
 # --> Calculate Theme co-occurrence per panel (Weighted)
-# --> Export CSVs to Gephi + (optional) GEXF
+# --> Export CSVs to Gephi
 # --> Save it in the SAME folder where this script is located.
 #
 #   Author: Iñaki Intxaurbe Alberdi 
@@ -192,14 +192,6 @@ E(g)$Weight <- edges$Weight
 
 out_graphml <- file.path(out_dir, "theme_cooc_network.graphml")
 write_graph(g, out_graphml, format = "graphml")
-
-message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
-        " - ", basename(out_nodes), "\n",
-        " - ", basename(out_edges), "\n",
-        " - ", basename(out_edges_j), "\n",
-        " - ", basename(out_bip_nodes), "\n",
-        " - ", basename(out_bip_edges), "\n",
-        " - ", basename(out_gexf), "\n")
 
 
 
