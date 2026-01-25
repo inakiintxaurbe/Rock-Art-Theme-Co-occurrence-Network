@@ -60,15 +60,8 @@ dat2 <- dat %>%
 # Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" -------------------------------------------------
 #    E.g.: S.E.II.01 -> S.E.II ----------------------------------------------------------------
 
-get_panel <- function(gu_vec) {
-  parts <- str_split(gu_vec, "\\.", simplify = TRUE)
-  if (ncol(parts) < 3) return(rep(NA_character_, length(gu_vec)))
-  paste(parts[, 1], parts[, 2], parts[, 3], sep = ".")
-}
-
 dat2 <- dat2 %>%
-  mutate(Panel = get_panel(GU)) %>%
-  filter(!is.na(Panel), Panel != "")
+  mutate(Panel = sub("^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", "\\1", GU))
 
 # Remove duplicates within the same panel (if a theme appears multiple times in that panel) <-- LEHENENGO ANALISIAN, BIGARRENIAN HAU KENDUKO DA TEMATIKEN PISUAK KALKULATEKO PANEL BAKOTZIAN
 dat_panel_theme <- dat2 %>%
@@ -192,6 +185,7 @@ E(g)$Weight <- edges$Weight
 
 out_graphml <- file.path(out_dir, "theme_cooc_network.graphml")
 write_graph(g, out_graphml, format = "graphml")
+
 
 
 
