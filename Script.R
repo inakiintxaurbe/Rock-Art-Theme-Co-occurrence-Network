@@ -39,7 +39,7 @@ library(readr)
 
 
 
-# Detect script folder (or fallback to getwd()) / Gidoiaren karpeta detektatu
+# Detect script folder /  Gidoiaren karpeta detektatu (or fallback to getwd())
 
 
 get_script_dir <- function() {
@@ -183,7 +183,7 @@ nodes <- dat_panel_theme %>%
 
 
 
-# (Optional) Jaccard metric for each pair of Themes
+# Jaccard metric for each pair of Themes
 #    J = shared_panels / (nx + ny - shared_panels)
 
 
@@ -227,7 +227,7 @@ write_csv(edges_jaccard, out_edges_j)
 
 
 
-# (Optional) Bipartite Panel-Theme (in case you want to see panels as nodes)
+# Bipartite Panel-Theme (to see panels as nodes) / Panel-gaika bipartitoa (panelak nodo gisa ikusteko)
 
 
 bip_edges <- dat_panel_theme %>%
@@ -248,7 +248,7 @@ write_csv(bip_edges, out_bip_edges)
 
 
 
-# (Optional) Export GEXF (To open in Gephi directly / zuzenian Gephi-n zabaltzeko)
+# Export GEXF (To open in Gephi directly / zuzenian Gephi-n zabaltzeko)
 
 
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
@@ -264,3 +264,4 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
