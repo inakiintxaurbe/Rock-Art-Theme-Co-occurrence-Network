@@ -1,7 +1,8 @@
 #   THEME CO-OCCURRENCE NETWORKS IN PALAEOLITHIC ROCK ART
 #
 # --> Download Table_DATA.xlsx from GitHub 
-#   (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art)
+#   (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art) 
+#   // THIS CAN BE CHANGED IN ORDER TO PUT THE LINK TO ANOTHER DATA BASE WITH THE SAME STRUCTURE
 # --> Extract Panel from GU code (e.g. S.E.II.01 -> S.E.II)
 # --> Calculate Theme co-occurrence per panel (Weighted)
 # --> Export CSVs to Gephi + (optional) GEXF
@@ -13,14 +14,13 @@
 #   PACEA UMR 5199
 #   (Université du Bordeaux)
 #   Date: 2026-01-04
-#   Copyright (C) 2026  Iñaki Intxaurbe
+#   Copyright (C) 2026 Iñaki Intxaurbe
 
 
 
 
 
-# Install packages / Paketiak instalatu
-
+# Install packages (if necessary) --------------------
 
 pkgs <- c("readxl", "dplyr", "stringr", "tidyr", "purrr", "igraph", "readr")
 to_install <- pkgs[!pkgs %in% rownames(installed.packages())]
@@ -35,71 +35,22 @@ library(igraph)
 library(readr)
 
 
+out_dir <- file.path(getwd(), "gephi_exports")
+if (!dir.exists(out_dir)) dir.create(out_dir)
 
 
-# Detect script folder /  Gidoiaren karpeta detektatu (or fallback to getwd())
+# GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE
 
-
-get_script_dir <- function() {
-  # Case 1: RStudio (interactive)
-  if (requireNamespace("rstudioapi", quietly = TRUE) &&
-      rstudioapi::isAvailable()) {
-    p <- rstudioapi::getActiveDocumentContext()$path
-    if (!is.null(p) && nzchar(p)) return(dirname(p))
-  }
-  
-  # Case 2: Rscript myscript.R  (commandArgs)
-  args <- commandArgs(trailingOnly = FALSE)
-  file_arg <- grep("^--file=", args, value = TRUE)
-  if (length(file_arg) > 0) {
-    p <- sub("^--file=", "", file_arg[1])
-    if (nzchar(p)) return(dirname(normalizePath(p)))
-  }
-  
-  # Fallback
-  getwd()
-}
-
-base_dir <- get_script_dir()
-out_dir  <- file.path(base_dir, "gephi_exports")
-if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
-
-message("Gephi output folder: ", out_dir)
-
-
-
-
-# GitHub URL -> RAW URL + download / GitHub URL -> RAW URL + Deskargatu
-
-
-github_raw_url <- function(url) {
-  if (str_detect(url, "github\\.com/.+/blob/")) {
-    url <- str_replace(url, "github\\.com/", "raw.githubusercontent.com/")
-    url <- str_replace(url, "/blob/", "/")
-  }
-  URLencode(url, reserved = TRUE)
-}
-
-xlsx_url <- "https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/blob/master/2%20STATISTICS/Table_DATA.xlsx"
-raw_url  <- github_raw_url(xlsx_url)
+xlsx_url <- "https://raw.githubusercontent.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/master/2%20STATISTICS/Table_DATA.xlsx"
 
 tmpfile <- file.path(tempdir(), "Table_DATA.xlsx")
-ok <- tryCatch({
-  download.file(raw_url, destfile = tmpfile, mode = "wb", quiet = TRUE)
-  TRUE
-}, error = function(e) FALSE)
 
-if (!ok || !file.exists(tmpfile)) stop("The Excel file could not be downloaded from GitHub / Ezin izan dogu excel-a deskargatu GitHub-etik.")
+download.file(xlsx_url, tmpfile, mode = "wb")
 
-
-
-
-# Read Excel / Excel-a irakurri
-
+dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")         
 
 sheet_name <- "FAMD_and_HCPC"  
 dat <- read_excel(tmpfile, sheet = sheet_name)
-
 
 gu_col <- if ("GU" %in% names(dat)) "GU" else names(dat)[1]
 
@@ -262,6 +213,7 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
 
 
 
