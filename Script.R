@@ -39,9 +39,11 @@ out_dir <- file.path(getwd(), "gephi_exports")
 if (!dir.exists(out_dir)) dir.create(out_dir)
 
 
-# GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE
+# V GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
 
-xlsx_url <- "https://raw.githubusercontent.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/master/2%20STATISTICS/Table_DATA.xlsx"
+xlsx_url <- "https://raw.githubusercontent.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/master/2%20STATISTICS/Table_DATA.xlsx" # <-- HERE !!!
+
+# Ʌ GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
 
 tmpfile <- file.path(tempdir(), "Table_DATA.xlsx")
 
@@ -52,13 +54,6 @@ dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")
 sheet_name <- "FAMD_and_HCPC"  
 dat <- read_excel(tmpfile, sheet = sheet_name)
 
-gu_col <- if ("GU" %in% names(dat)) "GU" else names(dat)[1]
-
-
-if (!("Theme" %in% names(dat))) {
-  stop("FATAL ERROR / ERRORRE FATALA (EZ DAU THEME AURKITZEN)")
-}
-
 dat2 <- dat %>%
   transmute(
     GU    = as.character(.data[[gu_col]]),
@@ -66,12 +61,8 @@ dat2 <- dat %>%
   ) %>%
   filter(!is.na(GU), GU != "", !is.na(Theme), Theme != "")
 
-
-
-
-# Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z"
-#    E.g.: S.E.II.01 -> S.E.II
-
+# Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" -------------------------------------------------
+#    E.g.: S.E.II.01 -> S.E.II ----------------------------------------------------------------
 
 get_panel <- function(gu_vec) {
   parts <- str_split(gu_vec, "\\.", simplify = TRUE)
@@ -213,6 +204,7 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
 
 
 
