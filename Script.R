@@ -46,17 +46,13 @@ xlsx_url <- "https://raw.githubusercontent.com/inakiintxaurbe/spatial-organizati
 # Ʌ GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
 
 tmpfile <- file.path(tempdir(), "Table_DATA.xlsx")
-
 download.file(xlsx_url, tmpfile, mode = "wb")
 
-dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")         
-
-sheet_name <- "FAMD_and_HCPC"  
-dat <- read_excel(tmpfile, sheet = sheet_name)
+dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")
 
 dat2 <- dat %>%
   transmute(
-    GU    = as.character(.data[[gu_col]]),
+    GU    = as.character(GU),
     Theme = as.character(Theme)
   ) %>%
   filter(!is.na(GU), GU != "", !is.na(Theme), Theme != "")
@@ -204,6 +200,7 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
 
 
 
