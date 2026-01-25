@@ -134,7 +134,7 @@ dat2 <- dat2 %>%
   mutate(Panel = get_panel(GU)) %>%
   filter(!is.na(Panel), Panel != "")
 
-# Remove duplicates within the same panel (if a theme appears multiple times in that panel)
+# Remove duplicates within the same panel (if a theme appears multiple times in that panel) <-- LEHENENGO ANALISIAN, BIGARRENIAN HAU KENDUKO DA TEMATIKEN PISUAK KALKULATEKO PANEL BAKOTZIAN
 dat_panel_theme <- dat2 %>%
   distinct(Panel, Theme)
 
@@ -264,4 +264,5 @@ message("\n Files saved in: / Artxiboak gordeta:\n", out_dir, "\n",
         " - ", basename(out_bip_nodes), "\n",
         " - ", basename(out_bip_edges), "\n",
         " - ", basename(out_gexf), "\n")
+
 
