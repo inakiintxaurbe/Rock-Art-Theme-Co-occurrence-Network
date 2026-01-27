@@ -186,8 +186,8 @@ nodes_all <- dat_panel_theme %>%
 # V Filtered network (change the thresholds) -------------------------------------------
 
 # Ajusta estos umbrales:
-min_weight  <- 3      # ej. 2–5
-min_jaccard <- 0.12   # ej. 0.08–0.20
+min_weight  <- 3      # e.g. 2–5
+min_jaccard <- 0.12   # e.g. 0.08–0.20
 
 # Ʌ Filtered network (change the thresholds) -------------------------------------------
 
@@ -274,5 +274,6 @@ write_csv(bip_edges, file.path(out_dir, "bip_edges_panel_theme.csv"))
 g_bip <- graph_from_data_frame(bip_edges, directed=FALSE, vertices=bip_nodes %>% rename(name=Id))
 V(g_bip)$Type <- bip_nodes$Type[match(V(g_bip)$name, bip_nodes$Id)]
 write_graph(g_bip, file.path(out_dir, "panel_theme_bipartite.graphml"), format="graphml")
+
 
 
