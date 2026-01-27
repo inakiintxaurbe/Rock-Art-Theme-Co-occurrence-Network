@@ -59,6 +59,9 @@ The following files are generated inside this folder:
 | `gephi_nodes_panel_theme_bipartite.csv`  | Nodes for Panel–Theme bipartite network      |
 | `gephi_edges_panel_theme_bipartite.csv`  | Edges for Panel–Theme bipartite network      |
 | `theme_cooc_network.graphml`             | Network file ready to open directly in Gephi |
+| `nodes_theme.csv`                        | It's used to filter the network              |
+| `bip_edges_panel_theme.csv`              | Panel-Theme edges for global network         |
+| `bip_nodes_panel_theme.csv`              | Panel-Theme nodes for global network         |
 
 The dataset is downloaded automatically from the following GitHub repository:
 
@@ -70,20 +73,6 @@ The dataset is downloaded automatically from the following GitHub repository:
 --------> **R** (version 4.0 or higher recommended)
 
 --------> **Gephi** (optional, for network visualization)
-
-## Usage
-
-1. Clone the repository:
-
-```git clone https://github.com/USERNAME/REPOSITORY_NAME.git```
-
-
-2. Open the script in RStudio or run it from the command line:
-
-```Rscript Script.R```
-
-
-3. Output files will be saved automatically in the ```gephi_exports/``` directory.
 
 
 ## Methodological Notes
