@@ -16,10 +16,6 @@
 #   Date: 2026-01-04
 #   Copyright (C) 2026 Iñaki Intxaurbe
 
-
-
-
-
 # Install packages (if necessary) --------------------
 
 pkgs <- c("readxl", "dplyr", "stringr", "tidyr", "purrr", "igraph", "readr")
@@ -34,10 +30,8 @@ library(purrr)
 library(igraph)
 library(readr)
 
-
 out_dir <- file.path(getwd(), "gephi_exports")
 if (!dir.exists(out_dir)) dir.create(out_dir)
-
 
 # V GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
 
@@ -185,6 +179,7 @@ E(g)$Weight <- edges$Weight
 
 out_graphml <- file.path(out_dir, "theme_cooc_network.graphml")
 write_graph(g, out_graphml, format = "graphml")
+
 
 
 
