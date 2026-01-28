@@ -16,7 +16,7 @@
 #   Date: 2026-01-04
 #   Copyright (C) 2026 Iñaki Intxaurbe
 
-# Install packages (if necessary) --------------------
+# Install packages (if necessary) ----------------------------------------------------------------------------------------------------------------------------------------------
 
 pkgs <- c("readxl", "dplyr", "stringr", "tidyr", "purrr", "igraph", "readr")
 to_install <- pkgs[!pkgs %in% rownames(installed.packages())]
@@ -51,36 +51,19 @@ dat2 <- dat %>%
   ) %>%
   filter(!is.na(GU), GU != "", !is.na(Theme), Theme != "")
 
-# Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" -------------------------------------------------
-#    E.g.: S.E.II.01 -> S.E.II ----------------------------------------------------------------
+# Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" ----------------------------------------------------------------------------------------------------------------------------------
+#    E.g.: S.E.II.01 -> S.E.II -------------------------------------------------------------------------------------------------------------------------------------------------
 
 dat2 <- dat2 %>%
   mutate(Panel = sub("^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", "\\1", GU))
 
-# Remove duplicates within the same panel (if a theme appears multiple times in that panel) <-- LEHENENGO ANALISIAN, BIGARRENIAN HAU KENDUKO DA TEMATIKEN PISUAK KALKULATEKO PANEL BAKOTZIAN
-dat_panel_theme <- dat2 %>%
-  distinct(Panel, Theme)
+# Remove duplicates (for Jaccard, filtered, comparisons) and takes into account for ponderated co-occurrence network analysis
+dat_panel_theme_1 <- dat2 %>% distinct(Panel, Theme)
+dat_panel_theme_2   <- dat2 %>% count(Panel, Theme, name = "n")
 
-# Co-occurrence network considering weight (nº of panels wher co-ocurrence)
-
-panel_to_edges <- function(df_panel) {
-  th <- sort(unique(df_panel$Theme))
-  if (length(th) < 2) {
-    return(tibble(Source = character(), Target = character(), Weight = integer()))
-  }
-  cmb <- t(combn(th, 2))
-  tibble(Source = cmb[, 1], Target = cmb[, 2], Weight = 1L)
-}
-
-edges <- dat_panel_theme %>%
-  group_by(Panel) %>%
-  group_modify(~ panel_to_edges(.x)) %>%
-  ungroup() %>%
-  group_by(Source, Target) %>%
-  summarise(Weight = sum(Weight), .groups = "drop") %>%
-  arrange(desc(Weight))
-
-nodes <- dat_panel_theme %>%
+# Co-occurrence network considering Jaccard (shared_panels / (nx + ny - shared_panels)) -----------------------------------------------------------------------------
+# Preponderating
+nodes <- dat_panel_theme_1 %>%
   group_by(Theme) %>%
   summarise(
     Id = first(Theme),
@@ -91,18 +74,15 @@ nodes <- dat_panel_theme %>%
   select(Id, Label, PanelFreq) %>%
   arrange(desc(PanelFreq))
 
-
-# Co-occurrence netwrork considering Jaccard (shared_panels / (nx + ny - shared_panels))
-
-theme_freq <- dat_panel_theme %>%
+theme_freq <- dat_panel_theme_1 %>%
   count(Theme, name = "n_panels")
 
-shared <- dat_panel_theme %>%
-  inner_join(dat_panel_theme, by = "Panel") %>%
+shared <- dat_panel_theme_1 %>%
+  inner_join(dat_panel_theme_1, by = "Panel") %>%
   filter(Theme.x < Theme.y) %>%
   count(Theme.x, Theme.y, name = "shared_panels")
 
-edges_jaccard <- shared %>%
+edges <- shared %>%
   left_join(theme_freq, by = c("Theme.x" = "Theme")) %>%
   rename(nx = n_panels) %>%
   left_join(theme_freq, by = c("Theme.y" = "Theme")) %>%
@@ -116,94 +96,85 @@ edges_jaccard <- shared %>%
   ) %>%
   arrange(desc(Weight), desc(Jaccard))
 
-
-# First exports to Gephi and bipartite Panel-Theme (to see panels as nodes)
-
 out_nodes <- file.path(out_dir, "gephi_nodes_theme.csv")
-out_edges <- file.path(out_dir, "gephi_edges_theme_cooc.csv")
 out_edges_j <- file.path(out_dir, "gephi_edges_theme_weighted_jaccard.csv")
 
 write_csv(nodes, out_nodes)
-write_csv(edges, out_edges)
-write_csv(edges_jaccard, out_edges_j)
-
-bip_edges <- dat_panel_theme %>%
-  count(Panel, Theme, name = "Weight") %>%
-  transmute(Source = Panel, Target = Theme, Weight = Weight)
-
-bip_nodes <- bind_rows(
-  tibble(Id = unique(dat_panel_theme$Panel), Label = unique(dat_panel_theme$Panel), Type = "Panel"),
-  tibble(Id = unique(dat_panel_theme$Theme), Label = unique(dat_panel_theme$Theme), Type = "Theme")
-)
-
-out_bip_nodes <- file.path(out_dir, "gephi_nodes_panel_theme_bipartite.csv")
-out_bip_edges <- file.path(out_dir, "gephi_edges_panel_theme_bipartite.csv")
-
-write_csv(bip_nodes, out_bip_nodes)
-write_csv(bip_edges, out_bip_edges)
+write_csv(edges, out_edges_j)
 
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
-E(g)$Weight <- edges$Weight
 
-out_graphml <- file.path(out_dir, "theme_cooc_network.graphml")
-write_graph(g, out_graphml, format = "graphml")
+write_graph(g, file.path(out_dir, "theme_cooc_weight_and_jaccard.graphml"), format = "graphml")
 
-
-# Stats per panel (without taking into account the nº of apparitions per panel)
-
-theme_freq <- dat_panel_theme %>%
-  count(Theme, name="n_panels")
-
-theme_edges <- dat_panel_theme %>%
-  inner_join(dat_panel_theme, by="Panel") %>%
+# Ponderating (takes into account the repetition of themes in each panel)
+edges_tt_weighted <- dat_panel_theme_2 %>%
+  inner_join(., ., by = "Panel") %>%
   filter(Theme.x < Theme.y) %>%
-  count(Theme.x, Theme.y, name="shared_panels")
+  mutate(Weight = n.x * n.y) %>%
+  group_by(Theme.x, Theme.y) %>%
+  summarise(Weight = sum(Weight), .groups = "drop") %>%
+  transmute(Source = Theme.x, Target = Theme.y, Weight) %>%
+  arrange(desc(Weight))
 
-edges_all <- theme_edges %>%
-  left_join(theme_freq, by=c("Theme.x"="Theme")) %>% rename(nx = n_panels) %>%
-  left_join(theme_freq, by=c("Theme.y"="Theme")) %>% rename(ny = n_panels) %>%
-  mutate(
-    jaccard = shared_panels / (nx + ny - shared_panels)
-  ) %>%
-  transmute(
-    Source = Theme.x,
-    Target = Theme.y,
-    Weight = shared_panels,
-    Jaccard = jaccard
-  ) %>%
-  arrange(desc(Weight), desc(Jaccard))
+write_csv(edges_tt_weighted, file.path(out_dir, "edges_theme_weighted_by_repetition.csv"))
+write_graph(
+  graph_from_data_frame(edges_tt_weighted, directed = FALSE, vertices = nodes),
+  file.path(out_dir, "theme_weighted_by_repetition.graphml"),
+  format = "graphml"
+)
 
-nodes_all <- dat_panel_theme %>%
-  group_by(Theme) %>%
-  summarise(
-    Id = first(Theme),
-    Label = first(Theme),
-    PanelFreq = n_distinct(Panel),
-    .groups="drop"
-  ) %>% arrange(desc(PanelFreq))
+# Global network Panel-Theme ---------------------------------------------------------------------------------------------------------------------------------------
+# Preponderating
 
+bip_edges_1 <- dat_panel_theme_1 %>%
+  transmute(Source = Panel, Target = Theme)
 
-# V Filtered network (change the thresholds) -------------------------------------------
+bip_nodes_1 <- bind_rows(
+  tibble(Id = unique(dat_panel_theme_1$Panel), Label = unique(dat_panel_theme_1$Panel), Type = "Panel"),
+  tibble(Id = unique(dat_panel_theme_1$Theme), Label = unique(dat_panel_theme_1$Theme), Type = "Theme")
+)
+
+write_csv(bip_nodes_1, file.path(out_dir, "bip_nodes_panel_theme_1.csv"))
+write_csv(bip_edges_1, file.path(out_dir, "bip_edges_panel_theme_1.csv"))
+
+g_bip_1 <- graph_from_data_frame(bip_edges_1, directed=FALSE, vertices=bip_nodes_1 %>% rename(name=Id))
+V(g_bip_1)$Type <- bip_nodes_1$Type[match(V(g_bip_1)$name, bip_nodes_1$Id)]
+write_graph(g_bip_1, file.path(out_dir, "panel_theme_bipartite_1.graphml"), format="graphml")
+
+# Ponderating (takes into account the repetition of themes in each panel)
+
+bip_edges_2 <- dat_panel_theme_2 %>%
+  transmute(Source = Panel, Target = Theme, Weight = n)
+
+bip_nodes_2 <- bind_rows(
+  tibble(Id = unique(dat_panel_theme_2$Panel), Label = unique(dat_panel_theme_2$Panel), Type = "Panel"),
+  tibble(Id = unique(dat_panel_theme_2$Theme), Label = unique(dat_panel_theme_2$Theme), Type = "Theme")
+)
+
+write_csv(bip_nodes_2, file.path(out_dir, "bip_nodes_panel_theme_2.csv"))
+write_csv(bip_edges_2, file.path(out_dir, "bip_edges_panel_theme_2.csv"))
+
+g_bip_2 <- graph_from_data_frame(bip_edges_2, directed=FALSE, vertices=bip_nodes_2 %>% rename(name=Id))
+V(g_bip_2)$Type <- bip_nodes_2$Type[match(V(g_bip_2)$name, bip_nodes_2$Id)]
+write_graph(g_bip_2, file.path(out_dir, "panel_theme_bipartite_2.graphml"), format="graphml")
+
+# V Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
 # Ajusta estos umbrales:
 min_weight  <- 3      # e.g. 2–5
 min_jaccard <- 0.12   # e.g. 0.08–0.20
 
-# Ʌ Filtered network (change the thresholds) -------------------------------------------
+# Ʌ Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
-edges_filt <- edges_all %>%
+edges_filt <- edges %>%
   filter(Weight >= min_weight, Jaccard >= min_jaccard)
 
-g_filt <- graph_from_data_frame(edges_filt, directed=FALSE, vertices=nodes_all)
+g_filt <- graph_from_data_frame(edges_filt, directed=FALSE, vertices=nodes)
 
-# Second exports to Gephi
-
-write_csv(nodes_all, file.path(out_dir, "nodes_theme.csv"))
-write_csv(edges_all, file.path(out_dir, "edges_theme_all.csv"))
 write_csv(edges_filt, file.path(out_dir, "edges_theme_filtered.csv"))
 write_graph(g_filt, file.path(out_dir, "theme_filtered.graphml"), format="graphml")
 
-# V MST (Minimum Spanning Tree) --------------------------------------------------------
+# MST (Minimum Spanning Tree) --------------------------------------------------------------------------------------------------------------------------------------
 
 E(g_filt)$cost <- 1 / E(g_filt)$Weight
 
@@ -216,13 +187,11 @@ mst_edges <- igraph::as_data_frame(mst_g, what = "edges") %>%
     by = c("Source", "Target")
   )
 
-# Third exports to Gephi
-
 write_csv(mst_edges, file.path(out_dir, "edges_theme_MST.csv"))
 write_graph(mst_g, file.path(out_dir, "theme_MST.graphml"), format = "graphml")
 
 
-# V EGO NETWORKS: Bison vs Ibex vs Horse -----------------------------------------------
+# EGO NETWORKS: Bison vs Ibex vs Horse ----------------------------------------------------------------------------------------------------------------------------
 
 ego_export <- function(g, center, order = 1) {
   
@@ -248,32 +217,6 @@ ego_export <- function(g, center, order = 1) {
   )
 }
 
-# Fourth exports to Gephi
-
 ego_export(g_filt, "Bison", order=1)
 ego_export(g_filt, "Ibex",  order=1)
 ego_export(g_filt, "Horse", order=1)
-
-
-# V Global network Panel-Theme ---------------------------------------------------------
-
-bip_edges <- dat_panel_theme %>%
-  count(Panel, Theme, name="Weight") %>%
-  transmute(Source = Panel, Target = Theme, Weight = Weight)
-
-bip_nodes <- bind_rows(
-  tibble(Id = unique(dat_panel_theme$Panel), Label = unique(dat_panel_theme$Panel), Type = "Panel"),
-  tibble(Id = unique(dat_panel_theme$Theme), Label = unique(dat_panel_theme$Theme), Type = "Theme")
-)
-
-# Fift exports to Gephi
-
-write_csv(bip_nodes, file.path(out_dir, "bip_nodes_panel_theme.csv"))
-write_csv(bip_edges, file.path(out_dir, "bip_edges_panel_theme.csv"))
-
-g_bip <- graph_from_data_frame(bip_edges, directed=FALSE, vertices=bip_nodes %>% rename(name=Id))
-V(g_bip)$Type <- bip_nodes$Type[match(V(g_bip)$name, bip_nodes$Id)]
-write_graph(g_bip, file.path(out_dir, "panel_theme_bipartite.graphml"), format="graphml")
-
-
-
