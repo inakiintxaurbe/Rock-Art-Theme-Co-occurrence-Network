@@ -160,7 +160,6 @@ write_graph(g_bip_2, file.path(out_dir, "panel_theme_bipartite_2.graphml"), form
 
 # V Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
-# Ajusta estos umbrales:
 min_weight  <- 3      # e.g. 2–5
 min_jaccard <- 0.12   # e.g. 0.08–0.20
 
@@ -220,3 +219,93 @@ ego_export <- function(g, center, order = 1) {
 ego_export(g_filt, "Bison", order=1)
 ego_export(g_filt, "Ibex",  order=1)
 ego_export(g_filt, "Horse", order=1)
+
+# LATERALITY AND INCLINATION OF THEMES ----------------------------------------------------------------------------------------------------------------------------
+
+df_fig <- dat %>%
+  transmute(
+    GU     = as.character(GU),
+    Panel  = sub("^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", "\\1", as.character(GU)),
+    Theme  = as.character(Theme),
+    Format = as.character(Format),
+    Orient = as.character(Orient),
+    Incl   = as.character(Incl)
+  ) %>%
+  filter(
+    Format != "NF_F",
+    Orient != "NF_O",
+    Incl   != "NF_I",
+  )
+
+# Theme x Orient (globals: chi-square and Cramer's V)
+
+tab_theme_orient <- df_fig %>%
+  count(Theme, Orient) %>%
+  tidyr::pivot_wider(names_from = Orient, values_from = n, values_fill = 0)
+
+write_csv(tab_theme_orient, file.path(out_dir, "tab_theme_by_orient.csv"))
+
+tab_or <- table(df_fig$Theme, df_fig$Orient)
+chi_or <- suppressWarnings(chisq.test(tab_or))
+
+cramers_v <- function(tab) {
+  chi <- suppressWarnings(chisq.test(tab)$statistic)
+  n <- sum(tab)
+  r <- nrow(tab); k <- ncol(tab)
+  as.numeric(sqrt(chi / (n * (min(r-1, k-1)))))
+}
+
+or_summary <- tibble(
+  Test = "Theme x Orient",
+  ChiSquare = as.numeric(chi_or$statistic),
+  df = as.numeric(chi_or$parameter),
+  p_value = as.numeric(chi_or$p.value),
+  CramersV = cramers_v(tab_or)
+)
+
+write_csv(or_summary, file.path(out_dir, "stats_theme_x_orient_global.csv"))
+
+
+# Theme x Orient (per-theme: binomials probabilities and BH correction)
+
+per_theme_lr <- df_fig %>%
+  count(Theme, Orient) %>%
+  tidyr::pivot_wider(names_from = Orient, values_from = n, values_fill = 0) %>%
+  mutate(
+    n_total = Left + Right,
+    prop_right = Right / n_total
+  ) %>%
+  rowwise() %>%
+  mutate(
+    p_binom = binom.test(Right, n_total, p = 0.5)$p.value,
+    direction = case_when(
+      prop_right > 0.5 ~ "Right",
+      prop_right < 0.5 ~ "Left",
+      prop_right == 0.5 ~ "Equal"
+    )
+  ) %>%
+  ungroup() %>%
+  mutate(
+    p_adj_BH = p.adjust(p_binom, method = "BH"),
+    sig_Binom = if_else(p_binom < 0.05, "*", ""),
+    sig_BH = if_else(p_adj_BH < 0.05, "**", "")
+  ) %>%
+  arrange(p_adj_BH, desc(n_total))
+
+write_csv(per_theme_lr, file.path(out_dir, "per_theme_right_left_binom.csv"))
+
+# Theme x Incl (residuals)
+
+tab_in <- table(df_fig$Theme, df_fig$Incl)
+chi_in <- suppressWarnings(chisq.test(tab_in))
+
+incl_residuals <- as.data.frame(as.table(chi_in$stdres)) %>%
+  dplyr::rename(
+    Theme = Var1,
+    Incl = Var2,
+    std_resid = Freq
+  ) %>%
+  dplyr::arrange(dplyr::desc(abs(std_resid)))
+
+write_csv(incl_residuals,file.path(out_dir, "stats_theme_x_incl_residuals.csv")
+)
