@@ -239,12 +239,6 @@ df_fig <- dat %>%
 
 # Theme x Orient (globals: chi-square and Cramer's V)
 
-tab_theme_orient <- df_fig %>%
-  count(Theme, Orient) %>%
-  tidyr::pivot_wider(names_from = Orient, values_from = n, values_fill = 0)
-
-write_csv(tab_theme_orient, file.path(out_dir, "tab_theme_by_orient.csv"))
-
 tab_or <- table(df_fig$Theme, df_fig$Orient)
 chi_or <- suppressWarnings(chisq.test(tab_or))
 
@@ -308,3 +302,4 @@ incl_residuals <- as.data.frame(as.table(chi_in$stdres)) %>%
   dplyr::arrange(dplyr::desc(abs(std_resid)))
 
 write_csv(incl_residuals,file.path(out_dir, "stats_theme_x_incl_residuals.csv"))
+
