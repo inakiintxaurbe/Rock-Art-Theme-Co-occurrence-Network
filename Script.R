@@ -160,8 +160,8 @@ write_graph(g_bip_2, file.path(out_dir, "panel_theme_bipartite_2.graphml"), form
 
 # V Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
-min_weight  <- 3      # e.g. 2–5
-min_jaccard <- 0.12   # e.g. 0.08–0.20
+min_weight  <- 3      # <-- HERE !!!
+min_jaccard <- 0.12   # <-- HERE !!!
 
 # Ʌ Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
@@ -234,7 +234,7 @@ df_fig <- dat %>%
   filter(
     Format != "NF_F",
     Orient != "NF_O",
-    Incl   != "NF_I",
+    Incl   != "NF_I"
   )
 
 # Theme x Orient (globals: chi-square and Cramer's V)
@@ -307,5 +307,4 @@ incl_residuals <- as.data.frame(as.table(chi_in$stdres)) %>%
   ) %>%
   dplyr::arrange(dplyr::desc(abs(std_resid)))
 
-write_csv(incl_residuals,file.path(out_dir, "stats_theme_x_incl_residuals.csv")
-)
+write_csv(incl_residuals,file.path(out_dir, "stats_theme_x_incl_residuals.csv"))
