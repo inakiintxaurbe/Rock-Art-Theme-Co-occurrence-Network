@@ -190,36 +190,6 @@ write_csv(mst_edges, file.path(out_dir, "edges_theme_MST.csv"))
 write_graph(mst_g, file.path(out_dir, "theme_MST.graphml"), format = "graphml")
 
 
-# EGO NETWORKS: Bison vs Ibex vs Horse ----------------------------------------------------------------------------------------------------------------------------
-
-ego_export <- function(g, center, order = 1) {
-  
-  sg <- igraph::make_ego_graph(
-    g,
-    order = order,
-    nodes = center,
-    mode = "all"
-  )[[1]]
-  
-  edges <- igraph::as_data_frame(sg, what = "edges") %>%
-    dplyr::rename(Source = from, Target = to)
-  
-  write_graph(
-    sg,
-    file.path(out_dir, paste0("ego_", center, ".graphml")),
-    format = "graphml"
-  )
-  
-  write_csv(
-    edges,
-    file.path(out_dir, paste0("ego_", center, "_edges.csv"))
-  )
-}
-
-ego_export(g_filt, "Bison", order=1)
-ego_export(g_filt, "Ibex",  order=1)
-ego_export(g_filt, "Horse", order=1)
-
 # LATERALITY AND INCLINATION OF THEMES ----------------------------------------------------------------------------------------------------------------------------
 
 df_fig <- dat %>%
