@@ -189,7 +189,6 @@ mst_edges <- igraph::as_data_frame(mst_g, what = "edges") %>%
 write_csv(mst_edges, file.path(out_dir, "edges_theme_MST.csv"))
 write_graph(mst_g, file.path(out_dir, "theme_MST.graphml"), format = "graphml")
 
-
 # LATERALITY AND INCLINATION OF THEMES ----------------------------------------------------------------------------------------------------------------------------
 
 df_fig <- dat %>%
