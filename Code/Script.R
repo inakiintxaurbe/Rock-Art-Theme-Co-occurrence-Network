@@ -124,7 +124,7 @@ write_graph(
 )
 
 # Global network Panel-Theme ---------------------------------------------------------------------------------------------------------------------------------------
-# Preponderating
+# Binary bipartite network (presence/absence)
 
 bip_edges_1 <- dat_panel_theme_1 %>%
   transmute(Source = Panel, Target = Theme)
@@ -141,7 +141,7 @@ g_bip_1 <- graph_from_data_frame(bip_edges_1, directed=FALSE, vertices=bip_nodes
 V(g_bip_1)$Type <- bip_nodes_1$Type[match(V(g_bip_1)$name, bip_nodes_1$Id)]
 write_graph(g_bip_1, file.path(out_dir, "panel_theme_bipartite_1.graphml"), format="graphml")
 
-# Ponderating (takes into account the repetition of themes in each panel)
+# Count-weighted bipartite network
 
 bip_edges_2 <- dat_panel_theme_2 %>%
   transmute(Source = Panel, Target = Theme, Weight = n)
