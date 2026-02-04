@@ -228,6 +228,44 @@ or_summary <- tibble(
 
 write_csv(or_summary, file.path(out_dir, "stats_theme_x_orient_global.csv"))
 
+# Confrontation signification of horse confronation index
+
+horse_df <- df_fig %>% filter(Theme == "Horse")
+others_df <- df_fig %>% filter(Theme != "Horse")
+
+horse_pairs <- horse_df %>%
+  inner_join(others_df, by = "Panel", suffix = c("_horse", "_other"))
+
+horse_pairs <- horse_pairs %>%
+  mutate(
+    facing = if_else(
+      Orient_horse != Orient_other,
+      1, 0
+    )
+  )
+
+n_facing <- sum(horse_pairs$facing)
+n_total  <- nrow(horse_pairs)
+
+horses_confrontation <- binom.test(n_facing, n_total, p = 0.5)
+
+horses_confrontation <- binom.test(n_facing, n_total, p = 0.5)
+
+horses_confrontation_df <- tibble(
+  Theme = "Horse",
+  n_facing = n_facing,
+  n_total = n_total,
+  prop_facing = n_facing / n_total,
+  p_value = horses_confrontation$p.value,
+  conf_low = horses_confrontation$conf.int[1],
+  conf_high = horses_confrontation$conf.int[2],
+  null_p = horses_confrontation$null.value
+)
+
+write_csv(
+  horses_confrontation_df,
+  file.path(out_dir, "confrontation_horses.csv")
+)
 
 # Theme x Orient (per-theme: binomials probabilities and BH correction)
 
