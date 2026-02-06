@@ -1,21 +1,21 @@
 # Rock-Art-Theme-Co-occurrence-Network
-**Created by**: Iñaki Intxaurbe Alberdi
+**Created by**: Iñaki Intxaurbe Alberdi  
 
-*Department of Graphic Design and Engineering Projects*
+*Department of Graphic Design and Engineering Projects*  
 
-*(Universidad del País Vasco/Euskal Herriko Unibertsitatea)*
+*(Universidad del País Vasco/Euskal Herriko Unibertsitatea)*  
 
-*PACEA UMR 5199*
+*PACEA UMR 5199* *(Université du Bordeaux)*  
 
-*(Université du Bordeaux)*
+**e-mail**: inaki.intxaurbe@ehu.eus; inaki.intxaurbe@u-bordeaux.fr; inaki.intxaurbe@gmail.com  
 
-**e-mail**: inaki.intxaurbe@ehu.eus; inaki.intxaurbe@u-bordeaux.fr; inaki.intxaurbe@gmail.com
+**ORCID**: https://orcid.org/0000-0003-3643-3177  
 
-**ORDICD nº**: https://orcid.org/0000-0003-3643-3177
+**Date**: 2026-01-04  
 
-**Date**: 2026-01-04
+*Copyright (C) 2026 Iñaki Intxaurbe*
 
-*Copyright (C) 2026  Iñaki Intxaurbe*
+---
 
 ## Overview
 
@@ -23,69 +23,147 @@ This repository contains an R script designed to generate a theme co-occurrence 
 
 The script downloads an Excel dataset from another GitHub repository (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art), processes thematic information at the panel level, and produces weighted networks based on shared thematic occurrences.
 
+Repository structure:
+- `Code/` → R script(s)
+- `Graphs/` → exported figures used in papers / reports (see below)
+
+---
+
 ## Purpose of the Script
 
-The main objectives of this script are:
+1) Downloads an Excel dataset from a GitHub URL (**editable in the script**).  
+2) Extracts Panel IDs from GU codes (e.g. `S.E.II.01` → `S.E.II`).  
+3) Builds multiple networks:
+   - **Theme–Theme co-occurrence** (binary; by shared panels)
+   - **Theme–Theme weighted** (counts motif repetition inside panels)
+   - **Jaccard-normalised** Theme–Theme associations
+   - **Filtered** network (by min weight + min Jaccard)
+   - **MST** (minimum spanning tree) from the filtered network
+   - **Panel–Theme bipartite** networks (binary and count-weighted)
+4) Computes additional orientation / inclination statistics and exports them as CSV.
 
---> Automatically download an Excel data table from a GitHub repository
+---
 
---> Extract **panels** from GU codes
+## Method (formal definitions)
 
---> Compute **theme** co-occurrence per panel (*weighted by frequency*)
+Let \(P=\{p_1,\dots,p_n\}\) be the set of panels and \(T_p\) the set of themes present in panel \(p\).
 
---> Generate multiple network representations:
+### Binary thematic co-occurrence (panel sharing)
 
---------> Theme–Theme co-occurrence network
+Binary co-occurrence between themes *i* and *j* is the number of panels where both occur:
 
---------> Theme–Theme network with *Jaccard* similarity
+$$
+C_{ij} = \sum_{p=1}^{n} \mathbf{1}\left(i \in T_p \;\wedge\; j \in T_p\right)
+$$
 
---------> Panel–Theme bipartite network (optional)
+where $\mathbf{1}(\cdot)$ denotes the indicator function. This captures structural association between themes independently of their repetition.
 
---> Export all outputs in formats ready for their edition in **Gephi**.
+### Weighted co-occurrence (motif repetition within panels)
 
-## Output Structure
+Let $n_{ip}$ and $n_{jp}$ be the number of occurrences of themes *i* and *j* in panel *p*.  
+Weighted co-occurrence is defined as:
 
-The script automatically creates a directory named:
+$$
+W_{ij} = \sum_{p=1}^{n} \left(n_{ip} \cdot n_{jp}\right)
+$$
 
-```gephi_exports/```
+This emphasises panels where themes are repeatedly associated and allows comparison between combinatorial vs. frequency-driven patterns.
 
-The following files are generated inside this folder:
+### Jaccard normalisation
 
-| File                                     | Description                                  |
-| ---------------------------------------- | -------------------------------------------- |
-| `gephi_nodes_theme.csv`                  | Theme node list                              |
-| `gephi_edges_theme_cooc.csv`             | Theme–Theme edges (weighted co-occurrence)   |
-| `gephi_edges_theme_weighted_jaccard.csv` | Theme–Theme edges with Jaccard index         |
-| `gephi_nodes_panel_theme_bipartite.csv`  | Nodes for Panel–Theme bipartite network      |
-| `gephi_edges_panel_theme_bipartite.csv`  | Edges for Panel–Theme bipartite network      |
-| `theme_cooc_network.graphml`             | Network file ready to open directly in Gephi |
-| `nodes_theme.csv`                        | It's used to filter the network              |
-| `bip_edges_panel_theme.csv`              | Panel-Theme edges for global network         |
-| `bip_nodes_panel_theme.csv`              | Panel-Theme nodes for global network         |
+Associations are normalised using the Jaccard similarity index:
 
-The dataset is downloaded automatically from the following GitHub repository:
+$$
+J(i,j) = \frac{C_{ij}}{C_i + C_j - C_{ij}}
+$$
 
-```https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art```
+where $C_i$ and $C_j$ correspond to the number of panels in which each theme occurs (Jaccard, 1901).  
+This reduces bias from highly recurrent motifs and facilitates comparisons across themes with different overall frequencies.
+
+---
+
+## How to run (RStudio)
+
+1. Open the script in `Code/` (RStudio recommended).
+2. (Optional) Change the dataset URL in the script:
+   ```r
+   xlsx_url <- "https://raw.githubusercontent.com/.../Table_DATA.xlsx"
+   ```
+3. Run the script. It will create an output folder named:
+   ```text
+   gephi_exports/
+   ```
+
+---
+
+## Outputs generated (updated)
+
+All files below are created inside `gephi_exports/`:
+
+| File | Description |
+|---|---|
+| `gephi_nodes_theme.csv` | Theme nodes (frequency = number of panels per theme) |
+| `gephi_edges_theme_weighted_jaccard.csv` | Theme–Theme edges with `Weight = shared_panels` and `Jaccard` |
+| `theme_cooc_weight_and_jaccard.graphml` | Theme–Theme network (GraphML; includes weight + Jaccard) |
+| `edges_theme_weighted_by_repetition.csv` | Theme–Theme edges with `Weight = Σ(n_ip·n_jp)` |
+| `theme_weighted_by_repetition.graphml` | Weighted-by-repetition Theme–Theme network (GraphML) |
+| `bip_nodes_panel_theme_1.csv` | Bipartite nodes (binary: presence/absence) |
+| `bip_edges_panel_theme_1.csv` | Bipartite edges (binary: presence/absence) |
+| `panel_theme_bipartite_1.graphml` | Bipartite (binary) network (GraphML) |
+| `bip_nodes_panel_theme_2.csv` | Bipartite nodes (count-weighted) |
+| `bip_edges_panel_theme_2.csv` | Bipartite edges with `Weight = n` (motif multiplicity) |
+| `panel_theme_bipartite_2.graphml` | Bipartite (count-weighted) network (GraphML) |
+| `edges_theme_filtered.csv` | Filtered Theme–Theme edges (thresholds below) |
+| `theme_filtered.graphml` | Filtered Theme–Theme network (GraphML) |
+| `edges_theme_MST.csv` | MST edges from filtered network |
+| `theme_MST.graphml` | MST network (GraphML) |
+| `stats_theme_x_orient_global.csv` | Global Theme × Orientation chi-square + Cramer's V |
+| `confrontation_horses.csv` | Horse “confrontation” (binomial test) results |
+| `per_theme_right_left_binom.csv` | Per-theme left/right binomial tests + BH correction |
+| `stats_theme_x_incl_residuals.csv` | Theme × Inclination: standardised residuals |
+
+### Filtering thresholds (editable in the script)
+
+```r
+min_weight  <- 3
+min_jaccard <- 0.12
+```
+
+---
+
+## Figures (Graphs/)
+
+The folder `Graphs/` contains ready-to-use figures derived from the exports:
+
+1. **Non-filtered theme co-occurrence networks**
+   - (1a) Frequency-weighted
+   - (1b) Jaccard-normalised
+2. **Filtered** theme network
+3. **MST** (minimum spanning tree)
+4. **Panel–Theme bipartite networks**
+   - (4a) Binary bipartite (presence/absence)
+   - (4b) Count-weighted bipartite (motif multiplicity)
+
+---
 
 ## Requirements
---> Software
 
---------> **R** (version 4.0 or higher recommended)
+- **R** (>= 4.0 recommended)
+- Packages used: `readxl`, `dplyr`, `stringr`, `tidyr`, `purrr`, `igraph`, `readr`
+- **Gephi** (optional; for visualisation and interactive exploration)
 
---------> **Gephi** (optional, for network visualization)
+---
 
+## Data source
 
-## Methodological Notes
+The script downloads the dataset automatically from:
 
-**Panels** are defined as the first three hierarchical levels of the GU code
-(e.g. ```S.E.II.01``` → ```S.E.II```)
+- https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art
 
-Theme co-occurrence is calculated based on **shared presence within panels**.
+You can replace the URL with any **equivalent Excel table** with the same structure (same sheet name and column names expected by the script).
 
-Edge weights represent the number of panels in which two themes co-occur
+---
 
-The **Jaccard similarity index** is calculated as:
+## License
 
-<img width="475" height="119" alt="image" src="https://github.com/user-attachments/assets/065e9a93-dc0c-48dc-b4b4-fa742a72854d" />
-
-where <img width="42" height="35" alt="image" src="https://github.com/user-attachments/assets/cf5c8891-542b-4287-9884-f45234c1c37f" /> and <img width="40" height="33" alt="image" src="https://github.com/user-attachments/assets/4c68f1ac-53d2-48e3-8daa-2b180b76f6d7" /> are the number of panels in which each theme appears.
+AGPL-3.0 *(Citation of the author and repository is **mandatory**)*
