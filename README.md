@@ -25,7 +25,7 @@ The script downloads an Excel dataset from another GitHub repository (https://gi
 
 Repository structure:
 - `Code/` → R script(s)
-- `Graphs/` → exported figures used in papers / reports (see below)
+- `Graphs/` → exported graphs to gephi (see below)
 
 ---
 
