@@ -162,6 +162,13 @@ The script downloads the dataset automatically from:
 
 You can replace the URL with any **equivalent Excel table** with the same structure (same sheet name and column names expected by the script).
 
+**Important**: It's importante maintain the IDs logic as follows `S.E.II.01`, where:
+
+- `S` is the ID of the cave (*for example, `S` is the ID of "Santimamiñe"*).
+- `E` is the ID of the sector (*for example, `E`is the ID of "Sector E"*).
+- `II` is the ID of the panel (*`II`is the second panel of "Sector E"*).
+- `01`is the ID of the GU (*`01`is the first GU in the "Panel II" of "Sector E"*).
+
 ---
 
 ## License
