@@ -46,7 +46,7 @@ Repository structure:
 
 ## Method (formal definitions)
 
-Let \(P=\{p_1,\dots,p_n\}\) be the set of panels and \(T_p\) the set of themes present in panel \(p\).
+Let $P=\{p_1,\dots,p_n\}$ be the set of panels and $T_p$ the set of themes present in panel \(p\).
 
 ### Binary thematic co-occurrence (panel sharing)
 
