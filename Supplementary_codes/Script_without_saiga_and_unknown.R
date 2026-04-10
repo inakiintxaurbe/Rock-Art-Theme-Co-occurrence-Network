@@ -205,7 +205,7 @@ df_fig <- dat %>%
     Format != "NF_F",
     Orient != "NF_O",
     Incl   != "NF_I",
-    Theme  != "Unknown"
+    Theme  != "Unknown",
     Theme  != "Saiga"
   )
 
