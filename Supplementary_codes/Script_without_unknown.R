@@ -204,7 +204,8 @@ df_fig <- dat %>%
   filter(
     Format != "NF_F",
     Orient != "NF_O",
-    Incl   != "NF_I"
+    Incl   != "NF_I",
+    Theme  != "Unknown"
   )
 
 # Theme x Orient (globals: chi-square and Cramer's V)
