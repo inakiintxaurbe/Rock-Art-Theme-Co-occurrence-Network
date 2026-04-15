@@ -1,4 +1,4 @@
-#   THEME CO-OCCURRENCE NETWORKS IN PALAEOLITHIC ROCK ART (With "Salmon" and "Flounder" as "Fish"-es)
+#   THEME CO-OCCURRENCE NETWORKS IN PALAEOLITHIC ROCK ART (With "Saiga" as "Unknown")
 #
 # --> Download Table_DATA.xlsx from GitHub 
 #   (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art) 
