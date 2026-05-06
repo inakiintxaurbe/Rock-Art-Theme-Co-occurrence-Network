@@ -19,7 +19,7 @@
 
 ## Overview
 
-This repository contains an R script designed to generate a theme co-occurrence network from Paleolithic cave art data. The resulting networks are exported in formats compatible with Gephi for further exploration, visualization, and network analysis.
+This repository contains an R script designed to generate a theme co-occurrence network from Paleolithic cave art data. The resulting networks are exported in formats compatible with Gephi for further exploration, visualization, and network analysis. The work was published in the following DOI: XXX.
 
 The script downloads an Excel dataset from another GitHub repository (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art), processes thematic information at the panel level, and produces weighted networks based on shared thematic occurrences.
 
@@ -161,7 +161,7 @@ The folder `Supplementary_codes/` contains five additional codes in order to per
 5. **Script_without_unknown.R**
    - This script removes the "unknown" figures
 
-The explainings of these supplementary analyses can be found in the "Supplementary Data" of the following DOI.
+The explainings of these supplementary analyses can be found in the "Supplementary Data" of the following DOI: XXX.
 
 ---
 
@@ -193,3 +193,7 @@ You can replace the URL with any **equivalent Excel table** with the same struct
 ## License
 
 AGPL-3.0 *(Citation of the author and repository is **mandatory**)*
+
+Please, cite this as : 
+
+- Intxaurbe, I. (2026). Mapping the symbolic structure of Palaeolithic rock art using co-occurrence network analysis. *Journal of Archaeological Method and Theory*, XXX.
