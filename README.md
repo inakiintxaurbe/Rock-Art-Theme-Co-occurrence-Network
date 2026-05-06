@@ -146,6 +146,25 @@ The folder `Graphs/` contains ready-to-use figures derived from the exports:
 
 ---
 
+## Supplementary Data (Supplementary_codes/)
+
+The folder `Supplementary_codes/` contains five additional codes in order to perform supplementary analysis :
+
+1. **Script_with_Saiga_as_Unknown.R**
+   - This script transforms using mutate the "Saiga" figures in "Unknown"
+2. **Script_with_salmon_and_flounder_as_Fish.R**
+   - This script transforms using mutate the "Salmon" and "Flounder" figures in "Fish"
+3. **Script_without_saiga_and_unknown.R**
+   - This script removes the "saiga" and "unknown" figures
+4. **Script_without_saiga_unknown_and_Atxurra.R**
+   - This script removes the "saiga" and "unknown" figures, as well as those which come from Atxurra cave
+5. **Script_without_unknown.R**
+   - This script removes the "unknown" figures
+
+The explainings of these supplementary analyses can be found in the "Supplementary Data" of the following DOI.
+
+---
+
 ## Requirements
 
 - **R** (>= 4.0 recommended)
