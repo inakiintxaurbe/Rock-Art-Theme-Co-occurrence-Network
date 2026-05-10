@@ -5,32 +5,22 @@
 #
 #   SPDX-License-Identifier: AGPL-3.0 (citation mandatory)
 
-# Install packages (if necessary) ----------------------------------------------------------------------------------------------------------------------------------------------
+# Install packages and organise framework ----------------------------------------------------------------------------------------------------------------------------------------------
 
-pkgs <- c("readxl", "dplyr", "stringr", "tidyr", "purrr", "igraph", "readr")
+pkgs <- c("readxl", "dplyr", "tidyr", "igraph", "readr")
 to_install <- pkgs[!pkgs %in% rownames(installed.packages())]
 if (length(to_install) > 0) install.packages(to_install)
-
 library(readxl)
 library(dplyr)
-library(stringr)
 library(tidyr)
-library(purrr)
 library(igraph)
 library(readr)
 
 out_dir <- file.path(getwd(), "gephi_exports")
 dir.create(out_dir)
 
-# V GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
-
-xlsx_url <- "https://raw.githubusercontent.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/master/2%20STATISTICS/Table_DATA.xlsx" # <-- HERE !!!
-
-# Ʌ GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
-
 tmpfile <- file.path(tempdir(), "Table_DATA.xlsx")
-download.file(xlsx_url, tmpfile, mode = "wb")
-
+download.file("https://raw.githubusercontent.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art/master/2%20STATISTICS/Table_DATA.xlsx", tmpfile, mode = "wb")
 dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")
 
 # Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" ----------------------------------------------------------------------------------------------------------------------------------
