@@ -46,8 +46,10 @@ nodes <- dat_panel_theme_1 %>%
   select(Id, Label, PanelFreq) %>%
   arrange(desc(PanelFreq))
 
-theme_freq <- dat_panel_theme_1 %>%
-  count(Theme, name = "n_panels")
+theme_freq <- nodes %>%
+  transmute(
+    Theme = Id, 
+    n_panels = PanelFreq)
 
 shared <- dat_panel_theme_1 %>%
   inner_join(dat_panel_theme_1, by = "Panel") %>%
@@ -56,17 +58,13 @@ shared <- dat_panel_theme_1 %>%
 
 edges <- shared %>%
   left_join(theme_freq, by = c("Theme.x" = "Theme")) %>%
-  rename(nx = n_panels) %>%
   left_join(theme_freq, by = c("Theme.y" = "Theme")) %>%
-  rename(ny = n_panels) %>%
-  mutate(jaccard = shared_panels / (nx + ny - shared_panels)) %>%
   transmute(
     Source  = Theme.x,
     Target  = Theme.y,
-    Weight  = shared_panels,  
-    Jaccard = jaccard
-  ) %>%
-  arrange(desc(Weight), desc(Jaccard))
+    Weight  = shared_panels,
+    Jaccard = shared_panels / (n_panels.x + n_panels.y - shared_panels)
+  )
 
 out_nodes <- file.path(out_dir, "gephi_nodes_theme.csv")
 out_edges_j <- file.path(out_dir, "gephi_edges_theme_weighted_jaccard.csv")
