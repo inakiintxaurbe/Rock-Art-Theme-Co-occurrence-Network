@@ -221,8 +221,6 @@ n_total  <- nrow(horse_pairs)
 
 horses_confrontation <- binom.test(n_facing, n_total, p = 0.5)
 
-horses_confrontation <- binom.test(n_facing, n_total, p = 0.5)
-
 horses_confrontation_df <- tibble(
   Theme = "Horse",
   n_facing = n_facing,
