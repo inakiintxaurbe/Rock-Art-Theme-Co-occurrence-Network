@@ -1,20 +1,9 @@
 #   THEME CO-OCCURRENCE NETWORKS IN PALAEOLITHIC ROCK ART
 #
-# --> Download Table_DATA.xlsx from GitHub 
-#   (https://github.com/inakiintxaurbe/spatial-organization-patterns-related-to-magdalenian-cave-art) 
-#   // THIS CAN BE CHANGED IN ORDER TO PUT THE LINK TO ANOTHER DATA BASE WITH THE SAME STRUCTURE
-# --> Extract Panel from GU code (e.g. S.E.II.01 -> S.E.II)
-# --> Calculate Theme co-occurrence per panel (Weighted)
-# --> Export CSVs to Gephi
-# --> Save it in the SAME folder where this script is located.
-#
 #   Author: Iñaki Intxaurbe Alberdi 
-#   Department of Graphic Design and Engineering Projects
-#   (Universidad del País Vasco/Euskal Herriko Unibertsitatea)
-#   PACEA UMR 5199
-#   (Université du Bordeaux)
-#   Date: 2026-01-04
 #   Copyright (C) 2026 Iñaki Intxaurbe
+#
+#   SPDX-License-Identifier: AGPL-3.0 (citation mandatory)
 
 # Install packages (if necessary) ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -31,7 +20,7 @@ library(igraph)
 library(readr)
 
 out_dir <- file.path(getwd(), "gephi_exports")
-if (!dir.exists(out_dir)) dir.create(out_dir)
+dir.create(out_dir)
 
 # V GitHub URL -> THE URL CAN BE CHANGED TO ANOTHER LINK CONTAINING A DATABASE WITH THE SAME STRUCTURE --------------------------------------------------------------------------
 
@@ -44,21 +33,15 @@ download.file(xlsx_url, tmpfile, mode = "wb")
 
 dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")
 
-dat2 <- dat %>%
-  transmute(
-    GU    = as.character(GU),
-    Theme = as.character(Theme)
-  )
-
 # Extract Panel from GU: "X.Y.Z.W" -> "X.Y.Z" ----------------------------------------------------------------------------------------------------------------------------------
 #    E.g.: S.E.II.01 -> S.E.II -------------------------------------------------------------------------------------------------------------------------------------------------
 
-dat2 <- dat2 %>%
+dat <- dat %>%
   mutate(Panel = sub("^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", "\\1", GU))
 
 # Remove duplicates (for Jaccard, filtered, comparisons) and takes into account for ponderated co-occurrence network analysis
-dat_panel_theme_1 <- dat2 %>% distinct(Panel, Theme)
-dat_panel_theme_2   <- dat2 %>% count(Panel, Theme, name = "n")
+dat_panel_theme_1 <- dat %>% distinct(Panel, Theme)
+dat_panel_theme_2   <- dat %>% count(Panel, Theme, name = "n")
 
 # Co-occurrence network considering Jaccard (shared_panels / (nx + ny - shared_panels)) -----------------------------------------------------------------------------
 # Preponderating
