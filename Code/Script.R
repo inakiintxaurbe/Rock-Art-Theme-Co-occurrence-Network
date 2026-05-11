@@ -153,8 +153,16 @@ bip_edges_2 <- dat_panel_theme_2 %>%
   )
 
 bip_nodes_2 <- bind_rows(
-  tibble(Id = unique(dat_panel_theme_2$Panel), Label = unique(dat_panel_theme_2$Panel), Type = "Panel"),
-  tibble(Id = unique(dat_panel_theme_2$Theme), Label = unique(dat_panel_theme_2$Theme), Type = "Theme")
+  tibble(
+    Id = unique(dat_panel_theme_2$Panel), 
+    Label = unique(dat_panel_theme_2$Panel), 
+    Type = "Panel"
+  ),
+  tibble(
+    Id = unique(dat_panel_theme_2$Theme), 
+    Label = unique(dat_panel_theme_2$Theme), 
+    Type = "Theme"
+  )
 )
 
 write_csv(bip_nodes_2, file.path(out_dir, "bip_nodes_panel_theme_2.csv"))
