@@ -27,11 +27,17 @@ dat <- readxl::read_excel(tmpfile, sheet = "FAMD_and_HCPC")
 #    E.g.: S.E.II.01 -> S.E.II -------------------------------------------------------------------------------------------------------------------------------------------------
 
 dat <- dat %>%
-  mutate(Panel = sub("^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", "\\1", GU))
+  mutate(
+    Panel = sub(
+      "^([^\\.]+\\.[^\\.]+\\.[^\\.]+).*", 
+      "\\1", 
+      GU
+    )
+  )
 
 # Remove duplicates (for Jaccard, filtered, comparisons) and takes into account for ponderated co-occurrence network analysis
 dat_panel_theme_1 <- dat %>% distinct(Panel, Theme)
-dat_panel_theme_2   <- dat %>% count(Panel, Theme, name = "n")
+dat_panel_theme_2 <- dat %>% count(Panel, Theme, name = "n")
 
 # Co-occurrence network considering Jaccard (shared_panels / (nx + ny - shared_panels)) -----------------------------------------------------------------------------
 # Preponderating
@@ -49,12 +55,20 @@ nodes <- dat_panel_theme_1 %>%
 theme_freq <- nodes %>%
   transmute(
     Theme = Id, 
-    n_panels = PanelFreq)
+    n_panels = PanelFreq
+  )
 
 shared <- dat_panel_theme_1 %>%
-  inner_join(dat_panel_theme_1, by = "Panel") %>%
+  inner_join(
+    dat_panel_theme_1, 
+    by = "Panel"
+  ) %>%
   filter(Theme.x < Theme.y) %>%
-  count(Theme.x, Theme.y, name = "shared_panels")
+  count(
+    Theme.x, 
+    Theme.y, 
+    name = "shared_panels"
+  )
 
 edges <- shared %>%
   left_join(theme_freq, by = c("Theme.x" = "Theme")) %>%
@@ -82,8 +96,15 @@ edges_tt_weighted <- dat_panel_theme_2 %>%
   filter(Theme.x < Theme.y) %>%
   mutate(Weight = n.x * n.y) %>%
   group_by(Theme.x, Theme.y) %>%
-  summarise(Weight = sum(Weight), .groups = "drop") %>%
-  transmute(Source = Theme.x, Target = Theme.y, Weight) %>%
+  summarise(
+    Weight = sum(Weight), 
+    .groups = "drop"
+  ) %>%
+  transmute(
+    Source = Theme.x, 
+    Target = Theme.y, 
+    Weight
+  ) %>%
   arrange(desc(Weight))
 
 write_csv(edges_tt_weighted, file.path(out_dir, "edges_theme_weighted_by_repetition.csv"))
@@ -97,11 +118,22 @@ write_graph(
 # Binary bipartite network (presence/absence)
 
 bip_edges_1 <- dat_panel_theme_1 %>%
-  transmute(Source = Panel, Target = Theme)
+  transmute(
+    Source = Panel, 
+    Target = Theme
+  )
 
 bip_nodes_1 <- bind_rows(
-  tibble(Id = unique(dat_panel_theme_1$Panel), Label = unique(dat_panel_theme_1$Panel), Type = "Panel"),
-  tibble(Id = unique(dat_panel_theme_1$Theme), Label = unique(dat_panel_theme_1$Theme), Type = "Theme")
+  tibble(
+    Id = unique(dat_panel_theme_1$Panel), 
+    Label = unique(dat_panel_theme_1$Panel), 
+    Type = "Panel"
+  ),
+  tibble(
+    Id = unique(dat_panel_theme_1$Theme), 
+    Label = unique(dat_panel_theme_1$Theme), 
+    Type = "Theme"
+  )
 )
 
 write_csv(bip_nodes_1, file.path(out_dir, "bip_nodes_panel_theme_1.csv"))
@@ -114,7 +146,11 @@ write_graph(g_bip_1, file.path(out_dir, "panel_theme_bipartite_1.graphml"), form
 # Count-weighted bipartite network
 
 bip_edges_2 <- dat_panel_theme_2 %>%
-  transmute(Source = Panel, Target = Theme, Weight = n)
+  transmute(
+    Source = Panel, 
+    Target = Theme, 
+    Weight = n
+  )
 
 bip_nodes_2 <- bind_rows(
   tibble(Id = unique(dat_panel_theme_2$Panel), Label = unique(dat_panel_theme_2$Panel), Type = "Panel"),
@@ -130,13 +166,14 @@ write_graph(g_bip_2, file.path(out_dir, "panel_theme_bipartite_2.graphml"), form
 
 # V Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
 
-min_weight  <- 3      # <-- HERE !!!
-min_jaccard <- 0.12   # <-- HERE !!!
-
-# Ʌ Filtered network (change the thresholds) -----------------------------------------------------------------------------------------------------------------------
+min_weight  <- 3      # <-- Change the thresholds there
+min_jaccard <- 0.12   # <-- Change the thresholds there
 
 edges_filt <- edges %>%
-  filter(Weight >= min_weight, Jaccard >= min_jaccard)
+  filter(
+    Weight >= min_weight, 
+    Jaccard >= min_jaccard
+  )
 
 g_filt <- graph_from_data_frame(edges_filt, directed=FALSE, vertices=nodes)
 
@@ -150,7 +187,10 @@ E(g_filt)$cost <- 1 / E(g_filt)$Weight
 mst_g <- igraph::mst(g_filt, weights = E(g_filt)$cost)
 
 mst_edges <- igraph::as_data_frame(mst_g, what = "edges") %>%
-  dplyr::rename(Source = from, Target = to) %>%
+  dplyr::rename(
+    Source = from, 
+    Target = to
+  ) %>%
   dplyr::left_join(
     edges_filt,
     by = c("Source", "Target")
@@ -204,7 +244,11 @@ horse_df <- df_fig %>% filter(Theme == "Horse")
 others_df <- df_fig %>% filter(Theme != "Horse")
 
 horse_pairs <- horse_df %>%
-  inner_join(others_df, by = "Panel", suffix = c("_horse", "_other"))
+  inner_join(
+    others_df, 
+    by = "Panel", 
+    suffix = c("_horse", "_other")
+  )
 
 horse_pairs <- horse_pairs %>%
   mutate(
@@ -239,7 +283,11 @@ write_csv(
 
 per_theme_lr <- df_fig %>%
   count(Theme, Orient) %>%
-  tidyr::pivot_wider(names_from = Orient, values_from = n, values_fill = 0) %>%
+  tidyr::pivot_wider(
+    names_from = Orient, 
+    values_from = n, 
+    values_fill = 0
+  ) %>%
   mutate(
     n_total = Left + Right,
     prop_right = Right / n_total
