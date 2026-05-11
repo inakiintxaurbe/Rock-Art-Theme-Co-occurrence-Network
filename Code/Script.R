@@ -199,7 +199,7 @@ mst_edges <- igraph::as_data_frame(mst_g, what = "edges") %>%
 write_csv(mst_edges, file.path(out_dir, "edges_theme_MST.csv"))
 write_graph(mst_g, file.path(out_dir, "theme_MST.graphml"), format = "graphml")
 
-# LATERALITY AND INCLINATION OF THEMES ----------------------------------------------------------------------------------------------------------------------------
+# Laterality and inclination of themes ----------------------------------------------------------------------------------------------------------------------------
 
 df_fig <- dat %>%
   transmute(
@@ -238,7 +238,7 @@ or_summary <- tibble(
 
 write_csv(or_summary, file.path(out_dir, "stats_theme_x_orient_global.csv"))
 
-# Confrontation signification of horse confronation index
+# Significance test of the horse confrontation index
 
 horse_df <- df_fig %>% filter(Theme == "Horse")
 others_df <- df_fig %>% filter(Theme != "Horse")
