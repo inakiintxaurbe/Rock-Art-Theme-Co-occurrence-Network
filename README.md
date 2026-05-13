@@ -168,7 +168,7 @@ The explainings of these supplementary analyses can be found in the "Supplementa
 ## Requirements
 
 - **R** (>= 4.0 recommended)
-- Packages used: `readxl`, `dplyr`, `stringr`, `tidyr`, `purrr`, `igraph`, `readr`
+- Packages used: `readxl`, `dplyr`, `tidyr`, `igraph`, `readr`
 - **Gephi** (optional; for visualisation and interactive exploration)
 
 ---
